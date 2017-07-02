@@ -20,9 +20,15 @@ Enables download of the SSO protected files from the Oracle website.
 
 	Examples:
 
-	  Downloads weblogic 12c:
-	  ./oradown.sh --username=foo --password=bar \
-	  --cookie=accept-weblogicserver-cookie \
-	  --output=wls12c.zip \
-	  http://download.oracle.com/otn/nt/middleware/12c/12212/fmw_12.2.1.2.0_wls_Disk1_1of1.zip
+	  Downloads weblogic 12c (oradown downloaded via wget):
+	    wget -O - -q https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | \
+		bash -s -- --cookie=accept-weblogicserver-server \
+		    --username=foo --password=bar \
+		    http://download.oracle.com/otn/nt/middleware/12c/12212/fmw_12.2.1.2.0_wls_Disk1_1of1.zip
+
+	    Downloads weblogic 12c (oradown downloaded via curl):
+	    curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | \
+		bash -s -- --cookie=accept-weblogicserver-server \
+		    --username=foo --password=bar \
+		    http://download.oracle.com/otn/nt/middleware/12c/12212/fmw_12.2.1.2.0_wls_Disk1_1of1.zip
       
