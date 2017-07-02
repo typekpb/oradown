@@ -1,4 +1,9 @@
 dist: trusty
 language: sh
-install: sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
+install: 
+  # install shpec
+  - sudo sh -c "`curl -L https://raw.github.com/rylnd/shpec/master/install.sh`"
+  # install xmllint
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libxml2-utils
 script: /bin/sh -c shpec
