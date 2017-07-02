@@ -7,36 +7,34 @@ TEST_URL=http://download.oracle.com/otn/nt/middleware/12c/12212/D-PCT-12212.zip
 
 describe "-V, --version argument"
     it "-V argument exit status is 0"
-        $SHPEC_ROOT/../oradown.sh -V #>/dev/null 2>&1 
+        $SHPEC_ROOT/../oradown.sh -V >/dev/null 2>&1 
         assert equal "$?" "0"
     end
 
     it "--version argument exit status is 0"
-        $SHPEC_ROOT/../oradown.sh --version #>/dev/null 2>&1 
+        $SHPEC_ROOT/../oradown.sh --version >/dev/null 2>&1 
         assert equal "$?" "0"
     end
 
     it "-V prints 'oradown version: 0.0.1'"
-        #message="$($SHPEC_ROOT/../oradown.sh -V 2>&1)"
-        message="$($SHPEC_ROOT/../oradown.sh -V )"
+        message="$($SHPEC_ROOT/../oradown.sh -V 2>&1)"
         assert grep "${message}" "oradown version: 0.0.1"
     end
 
     it "--version prints 'oradown version: 0.0.1'"
-        # message="$($SHPEC_ROOT/../oradown.sh --version 2>&1)"
-        message="$($SHPEC_ROOT/../oradown.sh --version )"
+        message="$($SHPEC_ROOT/../oradown.sh --version 2>&1)"
         assert grep "${message}" "oradown version: 0.0.1"
     end
 end
 
 describe "-H, --help argument"
     it "-H argument exit status is 0"
-        $SHPEC_ROOT/../oradown.sh -H #>/dev/null 2>&1 
+        $SHPEC_ROOT/../oradown.sh -H >/dev/null 2>&1 
         assert equal "$?" "0"
     end
 
     it "--help argument exit status is 0"
-        $SHPEC_ROOT/../oradown.sh --help #>/dev/null 2>&1 
+        $SHPEC_ROOT/../oradown.sh --help >/dev/null 2>&1 
         assert equal "$?" "0"
     end
 end
