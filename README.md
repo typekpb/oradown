@@ -5,7 +5,7 @@ Enables download of the SSO protected files from the Oracle website.
 
 # Usage
 
-	Usage: $cmdname [OPTION]... URL
+	Usage: oradown.sh [OPTION]... URL
 	oradown enables download of the SSO protected files (specified by URL) from the Oracle website.
 
 	Functional arguments:
