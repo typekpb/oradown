@@ -33,7 +33,7 @@ Functional arguments:
   
 Logging and info arguments:
   -H, --help                   print this help and exit
-  -V, --version                display the version of wtfc and exit.
+  -V, --version                display the version of oradown and exit.
 
 Examples:
 

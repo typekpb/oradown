@@ -16,7 +16,7 @@ Enables download of the SSO protected files from the Oracle website.
 	  
 	Logging and info arguments:
 	  -H, --help                   print this help and exit
-	  -V, --version                display the version of wtfc and exit.
+	  -V, --version                display the version of oradown and exit.
 
 	Examples:
 
