@@ -102,31 +102,64 @@ user_agent() {
 down() {
     USER_AGENT=$(user_agent)
     COOKIES_FILE=/tmp/oradown_COOKIES.txt
-    rm -rf ${COOKIES_FILE}
+    SSO_FILE=/tmp/oradown_SSO.html
+    rm -rf ${COOKIES_FILE} ${SSO_FILE}
 
-    # retrieve OAM_REQ parameter
-    OAM_REQ=$(curl -s -L -c ${COOKIES_FILE} ${URL} \
-        -H "User-Agent: ${USER_AGENT}" | \
-        xmllint --html --xpath "string(//form/input[@name='OAM_REQ']/@value)" -) 
+    # fetch osso_login page
+    curl -s -L -o ${SSO_FILE} -c ${COOKIES_FILE} ${URL} \
+        -H "User-Agent: ${USER_AGENT}" --compressed
+
+    # retrieve 'tap_token' parameter
+    TAP_TOKEN=$(cat ${SSO_FILE} |
+        xmllint --html --xpath "string(//form/input[@name='tap_token']/@value)" -)
+
+    # retrieve 'OAM_REQ' parameter
+    OAM_REQ=$(cat ${SSO_FILE} |
+        xmllint --html --xpath "string(//form/input[@name='OAM_REQ']/@value)" -)
+
+    # submit oamLoginPage form and retrieve 'fk' parameter
+    FK=$(curl -s -L -b ${COOKIES_FILE} -c ${COOKIES_FILE} 'https://login.oracle.com/oaam_server/oamLoginPage.jsp' \
+        -H "User-Agent: ${USER_AGENT}" \
+        -d "TapSubmitURL=https%3A%2F%2Flogin.oracle.com%2Foam%2Fserver%2Fdap%2Fcred_submit" \
+        -d "tap_token=${TAP_TOKEN}" -d "OAM_REQ=${OAM_REQ}" --compressed | \
+        xmllint --html --xpath "string(//form/input[@name='fk']/@value)" -)
+
+    # submit loginAuth form
+    curl -s -o /dev/null -b ${COOKIES_FILE} -c ${COOKIES_FILE} 'https://login.oracle.com/oaam_server/loginAuth.do' \
+        -H "Cookie: s_cc=true; oraclelicense=${COOKIE_ACCEPT_LICENSE};" \
+        -H "User-Agent: ${USER_AGENT}" \
+        --data-urlencode "userid=${ORCL_USER}" --data-urlencode "pass=${ORCL_PWD}" -d "fk=${FK}" --compressed
+
+    # fetch cred_submit page
+    curl -s -L -o ${SSO_FILE} -b ${COOKIES_FILE} -c ${COOKIES_FILE} 'https://login.oracle.com/oaam_server/authJump.do?jump=false&&clientOffset=0' \
+        -H "User-Agent: ${USER_AGENT}" --compressed
+
+    # retrieve 'oam_tap_token' parameter
+    TAP_TOKEN=$(cat ${SSO_FILE} |
+        xmllint --html --xpath "string(//form/input[@name='oam_tap_token']/@value)" -)
+
+    # retrieve 'OAM_REQ' parameter
+    OAM_REQ=$(cat ${SSO_FILE} |
+        xmllint --html --xpath "string(//form/input[@name='OAM_REQ']/@value)" -)
 
     # use filename from the URL (if explicit one not present)
     if [ -z "${OUTPUT_FILE}" ]; then
         OUTPUT_FILE=${URL##*/}
     fi
 
-    # download the file with the additionnal OAM_REQ parameter
-    curl -o ${OUTPUT_FILE} -L -b ${COOKIES_FILE} 'https://login.oracle.com/oam/server/sso/auth_cred_submit' \
+    # submit cred_submit form and download file
+    curl -L -o ${OUTPUT_FILE} -b ${COOKIES_FILE} -c ${COOKIES_FILE} 'https://login.oracle.com:443/oam/server/dap/cred_submit' \
         -H "Cookie: s_cc=true; oraclelicense=${COOKIE_ACCEPT_LICENSE};" \
         -H "User-Agent: ${USER_AGENT}" \
-        --data-urlencode "ssousername=${ORCL_USER}" --data-urlencode "password=${ORCL_PWD}" -d "OAM_REQ=${OAM_REQ}" --compressed
+        -d "oam_tap_token=${TAP_TOKEN}" -d "OAM_REQ=${OAM_REQ}" --compressed
 
-    rm -rf ${COOKIES_FILE}
+    rm -rf ${COOKIES_FILE} ${SSO_FILE}
 }
 
 # process arguments
 while [ $# -gt 0 ]
 do
-    case "$1" in        
+    case "$1" in
         -C)
         COOKIE_ACCEPT_LICENSE="$2"
         if [ -z "${COOKIE_ACCEPT_LICENSE}" ]; then break; fi
@@ -135,7 +168,7 @@ do
         --cookie=*)
         COOKIE_ACCEPT_LICENSE="${1#*=}"
         shift 1
-        ;;        
+        ;;
         -H | --help)
         usage 0
         ;;
@@ -147,7 +180,7 @@ do
         --output=*)
         OUTPUT_FILE="${1#*=}"
         shift 1
-        ;;        
+        ;;
         -P)
         ORCL_PWD="$2"
         if [ -z "${ORCL_PWD}" ]; then break; fi
@@ -156,7 +189,7 @@ do
         --password=*)
         ORCL_PWD="${1#*=}"
         shift 1
-        ;;        
+        ;;
         -U)
         ORCL_USER="$2"
         if [ -z "${ORCL_USER}" ]; then break; fi
@@ -165,14 +198,14 @@ do
         --username=*)
         ORCL_USER="${1#*=}"
         shift 1
-        ;;           
+        ;;
         -V | --version)
         version
         ;;
         *)
         URL="$@"
         break
-        ;;    
+        ;;
     esac
 done
 
