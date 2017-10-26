@@ -3,18 +3,18 @@ set -e
 
 cmdname="${0##*/}"
 
-VERSION=0.0.1
+VERSION=0.0.2
 
-echoto() { 
+echoto() {
     # print to stderr or to stdout
     out=$1
     shift 1
-    
+
     if ([ "${out}" -eq 2 ]); then
         printf "$@" >&2
     else
         # stdout can be silenced only
-        if [ "${QUIET}" -eq 0 ]; then 
+        if [ "${QUIET}" -eq 0 ]; then
             printf "$@"
         fi
     fi
@@ -30,7 +30,7 @@ Functional arguments:
   -O, --output=FILE            output FILE (optional)
   -P, --password=PASSWORD      set the Oracle PASSWORD (mandatory)
   -U, --username=USERNAME      set the Oracle USERNAME (mandatory)
-  
+
 Logging and info arguments:
   -H, --help                   print this help and exit
   -V, --version                display the version of oradown and exit.
