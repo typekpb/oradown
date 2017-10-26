@@ -95,21 +95,21 @@ describe "OK input"
 
     it "OK input downloads the specified file"
         $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
-        assert file_present "./D-PCT-12212.zip"
+        assert valid_zip "./D-PCT-12212.zip"
         # cleanup
         rm -rf D-PCT-12212.zip
     end
 
     it "OK input with -O argument downloads to the specified file"
         $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} -O /tmp/test.zip ${TEST_URL} >/dev/null 2>&1
-        assert file_present "/tmp/test.zip"
+        assert valid_zip "/tmp/test.zip"
         # cleanup
         rm -rf /tmp/test.zip
     end
 
     it "OK input with --output argument downloads to the specified file"
         $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} --output=/tmp/test.zip ${TEST_URL} >/dev/null 2>&1
-        assert file_present "/tmp/test.zip"
+        assert valid_zip "/tmp/test.zip"
         # cleanup
         rm -rf /tmp/test.zip
     end
