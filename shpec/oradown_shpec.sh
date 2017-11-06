@@ -16,14 +16,14 @@ describe "-V, --version argument"
         assert equal "$?" "0"
     end
 
-    it "-V prints 'oradown version: 0.0.2'"
+    it "-V prints 'oradown version: 0.0.3'"
         message="$($SHPEC_ROOT/../oradown.sh -V 2>&1)"
-        assert grep "${message}" "oradown version: 0.0.2"
+        assert grep "${message}" "oradown version: 0.0.3"
     end
 
-    it "--version prints 'oradown version: 0.0.2'"
+    it "--version prints 'oradown version: 0.0.3'"
         message="$($SHPEC_ROOT/../oradown.sh --version 2>&1)"
-        assert grep "${message}" "oradown version: 0.0.2"
+        assert grep "${message}" "oradown version: 0.0.3"
     end
 end
 
