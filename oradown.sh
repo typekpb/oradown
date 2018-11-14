@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 cmdname="${0##*/}"
 
-VERSION=0.0.3
+VERSION=0.0.4
 
 echoto() {
     # print to stderr or to stdout
@@ -104,16 +104,27 @@ down() {
     COOKIES_FILE=/tmp/oradown_COOKIES.txt
     rm -f ${COOKIES_FILE}
 
-    # fetch osso_login.jsp page and retrieve 'OAM_REQ' parameter
-    OAM_REQ=$(curl -s -L -c ${COOKIES_FILE} ${URL} \
-        -H "User-Agent: ${USER_AGENT}" --compressed |
-        xmllint --html --xpath "string(//form/input[@name='OAM_REQ']/@value)" -)
+    # fetch osso_login.jsp page and retrieve form parameters
+    form_data="$(curl -s -L -c ${COOKIES_FILE} -H "User-Agent: ${USER_AGENT}" ${URL})"
 
-    # submit signon.jsp form
-    curl -s -o /dev/null -b ${COOKIES_FILE} -c ${COOKIES_FILE} 'https://login.oracle.com/mysso/signon.jsp' \
-        -H "User-Agent: ${USER_AGENT}" \
-        -d "OAM_REQ=${OAM_REQ}" \
-        --compressed
+    declare -a form_fields=(
+        'OAM_REQ'
+        'request_id'
+        'site2pstoretoken'
+        'v'
+    )
+
+    declare data_string
+
+    declare -i count
+    for f in ${form_fields[@]}; do
+        count=$((count+1))
+        xpath="string(//form/input[@name='${f}']/@value)"
+        data_string+="${f}=$(echo ${form_data} | xmllint --html --xpath ${xpath} 2>/dev/null -)"
+        if [[ $count -lt ${#form_fields[@]} ]]; then
+            data_string+='&'
+        fi
+    done
 
     # use filename from the URL (if explicit one not present)
     if [ -z "${OUTPUT_FILE}" ]; then
@@ -126,7 +137,7 @@ down() {
         -H "User-Agent: ${USER_AGENT}" \
         --data-urlencode "ssousername=${ORCL_USER}" \
         --data-urlencode "password=${ORCL_PWD}" \
-        -d "OAM_REQ=${OAM_REQ}" \
+        -d "${data_string}" \
         --compressed
 
     rm -f ${COOKIES_FILE}
