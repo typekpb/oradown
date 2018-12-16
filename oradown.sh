@@ -169,7 +169,7 @@ do
         shift 1
         ;;
         -P)
-        ORCL_PWD="$2"
+        ORCL_PWD="'$2'"
         if [ -z "${ORCL_PWD}" ]; then break; fi
         shift 2
         ;;
