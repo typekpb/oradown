@@ -40,14 +40,13 @@ describe "-H, --help argument"
 end
 
 describe "-P, --password argument"
-    it "-P|--password argument missing causes exits status 1"
-        $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
-        assert equal "$?" "1"
+    it "-P|--password argument missing causes exits status 0"
+        echo ${TEST_PASSWORD} | $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
+        assert equal "$?" "0"
     end
-
-    it "-P|--password argument missing prints: 'Error: PASSWORD is mandatory'"
-        message="$($SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} 2>&1)"
-        assert grep "$message" "Error: PASSWORD is mandatory"
+    it "-P|--password argument missing prints password prompt"
+        message="$(echo ${TEST_PASSWORD} | $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} 2>&1)"
+        assert grep "$message" "Enter password for ${TEST_USERNAME}:"
     end
 end
 
