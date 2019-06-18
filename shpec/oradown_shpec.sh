@@ -1,6 +1,8 @@
-# to be set in CI
-TEST_USERNAME=$ORA_LOGIN
-TEST_PASSWORD=$ORA_PWD
+# to be set in CI, for same-origin req2uests only
+# https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions
+
+TEST_USERNAME=${ORA_LOGIN-nologin}
+TEST_PASSWORD=${ORA_PWD-nopassword}
 
 TEST_LICENSE_COOKIE=accept-weblogicserver-cookie
 TEST_URL=http://download.oracle.com/otn/nt/middleware/12c/12212/D-PCT-12212.zip
@@ -40,14 +42,13 @@ describe "-H, --help argument"
 end
 
 describe "-P, --password argument"
-    it "-P|--password argument missing causes exits status 1"
-        $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
-        assert equal "$?" "1"
+    it "-P|--password argument missing causes exits status 0"
+        echo ${TEST_PASSWORD} | $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
+        assert equal "$?" "0"
     end
-
-    it "-P|--password argument missing prints: 'Error: PASSWORD is mandatory'"
-        message="$($SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} 2>&1)"
-        assert grep "$message" "Error: PASSWORD is mandatory"
+    it "-P|--password argument missing prints password prompt"
+        message="$(echo ${TEST_PASSWORD} | $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} 2>&1)"
+        assert grep "$message" "Enter password for ${TEST_USERNAME}:"
     end
 end
 
@@ -87,30 +88,35 @@ describe "URL"
     end
 end
 
-describe "OK input"
-    it "OK input causes exits status 0"
-        $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
-        assert equal "$?" "0"
-    end
+if [[ "${ORA_LOGIN}" -ne "" ]]; then
+    describe "OK input"
+        it "OK input causes exits status 0"
+            $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
+            assert equal "$?" "0"
+        end
 
-    it "OK input downloads the specified file"
-        $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
-        assert valid_zip "./D-PCT-12212.zip"
-        # cleanup
-        rm -rf D-PCT-12212.zip
-    end
+        it "OK input downloads the specified file"
+            $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
+            assert valid_zip "./D-PCT-12212.zip"
+            # cleanup
+            rm -rf D-PCT-12212.zip
+        end
 
-    it "OK input with -O argument downloads to the specified file"
-        $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} -O /tmp/test.zip ${TEST_URL} >/dev/null 2>&1
-        assert valid_zip "/tmp/test.zip"
-        # cleanup
-        rm -rf /tmp/test.zip
-    end
+        it "OK input with -O argument downloads to the specified file"
+            $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} -O /tmp/test.zip ${TEST_URL} >/dev/null 2>&1
+            assert valid_zip "/tmp/test.zip"
+            # cleanup
+            rm -rf /tmp/test.zip
+        end
 
-    it "OK input with --output argument downloads to the specified file"
-        $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} --output=/tmp/test.zip ${TEST_URL} >/dev/null 2>&1
-        assert valid_zip "/tmp/test.zip"
-        # cleanup
-        rm -rf /tmp/test.zip
+        it "OK input with --output argument downloads to the specified file"
+            $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} --output=/tmp/test.zip ${TEST_URL} >/dev/null 2>&1
+            assert valid_zip "/tmp/test.zip"
+            # cleanup
+            rm -rf /tmp/test.zip
+        end
     end
-end
+else
+    echo "ORA_LOGIN is not set; skipping tests which involve actually connecting to Oracle."
+fi
+

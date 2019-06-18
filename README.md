@@ -11,7 +11,7 @@ Enables download of the SSO protected files from the Oracle website.
 	Functional arguments:
 	  -C, --cookie=LICENSE_COOKIE  name of the license cookie (mandatory)
 	  -O, --output=FILE            output FILE (optional)
-	  -P, --password=PASSWORD      set the Oracle PASSWORD (mandatory)
+	  -P, --password=PASSWORD      set the Oracle PASSWORD (optional)
 	  -U, --username=USERNAME      set the Oracle USERNAME (mandatory)
 	  
 	Logging and info arguments:
