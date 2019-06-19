@@ -88,7 +88,7 @@ describe "URL"
     end
 end
 
-if [[ "${ORA_LOGIN}" -ne "" ]]; then
+if [ "${ORA_LOGIN}" != "" ]; then
     describe "OK input"
         it "OK input causes exits status 0"
             $SHPEC_ROOT/../oradown.sh --username=${TEST_USERNAME} --password=${TEST_PASSWORD} --cookie=${TEST_LICENSE_COOKIE} ${TEST_URL} >/dev/null 2>&1
